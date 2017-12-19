@@ -1,0 +1,5 @@
+log/*/*
+mysql/databases/*
+.DS_Store
+!.gitkeep
+var/

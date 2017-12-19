@@ -1,0 +1,42 @@
+# PHP
+
+phpfpm:
+  restart: always
+  build: .docker/php
+  volumes:
+    - ./.docker/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf
+    - ./.docker/php/conf/php.ini:/usr/local/etc/php/php.ini
+    - ./mautic:/var/www/html
+    - ./var/log/php-fpm:/var/log/php-fpm
+  links:
+    - db:db
+
+# NGINX
+nginx:
+  restart: always
+  image: nginx:latest
+  ports:
+    - "8000:80"
+  links:
+    - phpfpm:phpfpm
+  volumes:
+    - ./.docker/nginx/conf/vhost.conf:/etc/nginx/conf.d/default.conf
+    - ./mautic:/var/www/html
+    - ./var/log/nginx:/var/log/nginx
+
+# MYSQL
+db:
+  restart: always
+  image: mysql:5.7
+  ports:
+    - "3306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: 123456
+    MYSQL_USER: mautic_dev
+    MYSQL_PASSWORD: sxdf675n
+    MYSQL_DATABASE: database
+  volumes:
+    - ./var/lib/mysql:/var/lib/mysql
+    - ./var/log/mysql:/var/log/mysql
+
+#  - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock
