@@ -1,4 +1,10 @@
 # PHP
+mailhog:
+  build: .docker/mailhog
+  ports:
+    - "8025:8025"
+#    - "25:1025"
+ 
 
 phpfpm:
   restart: always
@@ -10,6 +16,7 @@ phpfpm:
     - ./var/log/php-fpm:/var/log/php-fpm
   links:
     - db:db
+    - mailhog:mail
 
 # NGINX
 nginx:
@@ -34,7 +41,7 @@ db:
     MYSQL_ROOT_PASSWORD: 123456
     MYSQL_USER: mautic_dev
     MYSQL_PASSWORD: sxdf675n
-    MYSQL_DATABASE: database
+    MYSQL_DATABASE: mautic
   volumes:
     - ./var/lib/mysql:/var/lib/mysql
     - ./var/log/mysql:/var/log/mysql

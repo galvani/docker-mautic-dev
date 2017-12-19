@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y \
 	mysql-client \
 	libxml2-dev \
 	zlib1g-dev \
+	libc-client-dev libkrb5-dev \
 	&& docker-php-ext-install pdo_mysql \
 	&& docker-php-ext-install iconv \
+	&& docker-php-ext-configure imap --with-kerberos --with-imap --with-imap-ssl \
+    && docker-php-ext-install imap \
 	&& docker-php-ext-install mcrypt \
 	&& docker-php-ext-install mysql \
 	&& docker-php-ext-install intl \
