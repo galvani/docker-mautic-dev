@@ -3,7 +3,8 @@ mailhog:
   build: .docker/mailhog
   ports:
     - "8025:8025"
-#    - "25:1025"
+  expose:
+    - 1025
  
 
 phpfpm:
@@ -17,13 +18,13 @@ phpfpm:
   links:
     - db:db
     - mailhog:mail
-
+  
 # NGINX
 nginx:
   restart: always
   image: nginx:latest
   ports:
-    - "8000:80"
+    - "8080:8080"
   links:
     - phpfpm:phpfpm
   volumes:
@@ -36,10 +37,12 @@ db:
   restart: always
   image: mysql:5.7
   ports:
-    - "3306:3306"
+    - 3306:3306
+  expose:
+    - 3306
   environment:
-    MYSQL_ROOT_PASSWORD: 123456
-    MYSQL_USER: mautic_dev
+    MYSQL_ROOT_PASSWORD: 8wuniwcwfh
+    MYSQL_USER: mautic
     MYSQL_PASSWORD: sxdf675n
     MYSQL_DATABASE: mautic
   volumes:
