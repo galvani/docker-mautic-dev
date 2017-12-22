@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
 	libxml2-dev \
 	zlib1g-dev \
 	libc-client-dev libkrb5-dev \
-	&& docker-php-ext-install pdo_mysql \
+	php5-cli
+RUN apt-get install -y vim
+RUN docker-php-ext-install pdo_mysql \
 	&& docker-php-ext-install iconv \
 	&& docker-php-ext-configure imap --with-kerberos --with-imap --with-imap-ssl \
     && docker-php-ext-install imap \
@@ -19,6 +21,14 @@ RUN apt-get update && apt-get install -y \
 	&& docker-php-ext-install xml \
 	&& docker-php-ext-install zip
 RUN apt-get install -y wget lsb-release
-RUN wget http://dev.mysql.com/get/mysql-apt-config_0.7.3-1_all.deb
-RUN dpkg -i mysql-apt-config_0.7.3-1_all.deb
+RUN apt-get -y install cron
+
+COPY ./conf/cron/mautic /etc/cron.d/mautic
+RUN chmod 0755 /etc/cron.d/mautic
+
+# Create the log file to be able to run tail
+RUN touch /var/log/cron.log
+
+# Run the command on container startup
+# CMD cron && tail -f /var/log/cron.log
 CMD ["php-fpm"]

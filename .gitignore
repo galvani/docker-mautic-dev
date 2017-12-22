@@ -3,3 +3,8 @@ mysql/databases/*
 .DS_Store
 !.gitkeep
 var/
+
+###> symfony/webpack-encore-pack ###
+/node_modules/
+/public/build/
+###< symfony/webpack-encore-pack ###
