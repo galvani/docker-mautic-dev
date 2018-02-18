@@ -18,13 +18,14 @@ phpfpm:
   links:
     - db:db
     - mailhog:mail
+    - elasticsearch:elasticsearch
   environment:
     MAUTIC_DEV_HOSTS: 172.17.0.1
     XDEBUG_CONFIG: remote_host=172.17.0.1
   
 # NGINX
 nginx:
-  restart: always
+#  restart: always
   image: nginx:latest
   ports:
     - "8080:8080"
@@ -39,7 +40,7 @@ nginx:
 
 # MYSQL
 db:
-  restart: always
+#  restart: always
   image: mysql:5.7
   ports:
     - 3307:3306
@@ -53,3 +54,11 @@ db:
   volumes:
     - ./var/lib/mysql:/var/lib/mysql
     - ./var/log/mysql:/var/log/mysql
+
+elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch:6.2.1
+  ports:
+    - 9200:9200
+    - 9300:9300
+  environment:
+    - discovery.type=single-node
