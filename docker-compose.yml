@@ -1,49 +1,45 @@
-# PHP
 mailhog:
   build: .docker/mailhog
   ports:
-    - "8025:8025"
+    - '8025:8025'
   expose:
     - 1025
- 
-
 phpfpm:
   restart: always
   build: .docker/php
   volumes:
-    - ./.docker/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf
-    - ./.docker/php/conf/php.ini:/usr/local/etc/php/php.ini
-    - ./mautic:/var/www/html
-    - ./var/log/php-fpm:/var/log/php-fpm
+    - './.docker/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf'
+    - './.docker/php/conf/php.ini:/usr/local/etc/php/php.ini'
+    - './mautic:/var/www/html'
+    - './mautic-hosted:/var/www/html-hosted'
+    - './var/log/php-fpm:/var/log/php-fpm'
+    - './var/mail:/var/spool/mail'
   links:
-    - db:db
-    - mailhog:mail
-    - elasticsearch:elasticsearch
+    - 'db:db'
+    - 'mailhog:mail'
+    - 'beanstalkd:beanstalkd'
+    - 'redis:redis'
   environment:
     MAUTIC_DEV_HOSTS: 172.17.0.1
     XDEBUG_CONFIG: remote_host=172.17.0.1
-  
-# NGINX
 nginx:
-#  restart: always
-  image: nginx:latest
+  image: 'nginx:latest'
   ports:
-    - "8080:8080"
+    - '8080:8080'
+    - '8081:8081'
   links:
-    - phpfpm:phpfpm
+    - 'phpfpm:phpfpm'
   volumes:
-    - ./.docker/nginx/conf/vhost.conf:/etc/nginx/conf.d/default.conf
-    - ./mautic:/var/www/html
-    - ./var/log/nginx:/var/log/nginx
+    - './.docker/nginx/conf/vhost.conf:/etc/nginx/conf.d/default.conf'
+    - './var/log/nginx:/var/log/nginx'
+  volumes_from:
+    - phpfpm
   environment:
     - BEANSTALKD_HOST=beanstalkd
-
-# MYSQL
 db:
-#  restart: always
-  image: mysql:5.7
+  image: 'mysql:5.7'
   ports:
-    - 3307:3306
+    - '3307:3306'
   expose:
     - 3306
   environment:
@@ -52,13 +48,30 @@ db:
     MYSQL_PASSWORD: sxdf675n
     MYSQL_DATABASE: mautic
   volumes:
-    - ./var/lib/mysql:/var/lib/mysql
-    - ./var/log/mysql:/var/log/mysql
-
-elasticsearch:
-  image: docker.elastic.co/elasticsearch/elasticsearch:6.2.1
+    - './var/lib/mysql:/var/lib/mysql'
+    - './var/log/mysql:/var/log/mysql'
+# elasticsearch:
+#   image: 'docker.elastic.co/elasticsearch/elasticsearch:6.2.1'
+#   ports:
+#     - '9200:9200'
+#     - '9300:9300'
+#   environment:
+#     - discovery.type=single-node
+beanstalkd:
+  image: schickling/beanstalkd
   ports:
-    - 9200:9200
-    - 9300:9300
-  environment:
-    - discovery.type=single-node
+    - '11300:11300'
+  expose:
+    - 11300
+beanstalkd-console:
+  image: schickling/beanstalkd-console
+  ports:
+    - '2080:2080'
+  links:
+    - 'beanstalkd:beanstalkd'
+redis:
+  image: 'redis:latest'
+  ports:
+    - 6379:6379
+  expose:
+    - 6379

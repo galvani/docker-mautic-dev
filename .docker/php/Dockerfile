@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:16.04
 
 EXPOSE 9000
 
@@ -15,11 +15,11 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 RUN yes | apt-get install software-properties-common python-software-properties
 RUN yes | add-apt-repository ppa:ondrej/php
 
-RUN apt-get install -y php-apcu php-mailparse php-pear php7.1-bcmath php7.1-cli php7.1-common php7.1-curl php7.1-dev php7.1-fpm \
+RUN apt-get update && apt-get install -y php-apcu php-mailparse php-pear php7.1-bcmath php7.1-cli php7.1-common php7.1-curl php7.1-dev php7.1-fpm \
     php7.1-gd php7.1-intl php7.1-json php7.1-mbstring php7.1-mcrypt php7.1-mysql php7.1-opcache php7.1-readline php7.1-soap \
     php7.1-xml php7.1-xmlrpc php7.1-xsl php7.1-zip
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
 	libmcrypt-dev  \
 	libicu-dev \
 	mysql-client \
@@ -36,16 +36,10 @@ RUN apt-get install -y wget lsb-release
 RUN apt-get -y install cron
 
 # Enable xdebug
-# RUN yes | pecl install xdebug \
-#     && echo "zend_extension=$(find /usr/lib -name xdebug.so)" > /etc/php/7.1/fpm/conf.d/xdebug.ini \
-#     && echo "xdebug.remote_enable=on" >> /etc/php/7.1/fpm/conf.d/xdebug.ini \
-#     && echo "xdebug.remote_autostart=off" >> /etc/php/7.1/fpm/conf.d/xdebug.ini
-
-# Enable xdebug
 RUN apt-get install php-xdebug \
-&& echo "zend_extension=$(find /usr/lib -name xdebug.so)" > /etc/php/7.1/fpm/conf.d/xdebug.ini \
-     && echo "xdebug.remote_enable=on" >> /etc/php/7.1/fpm/conf.d/xdebug.ini \
-     && echo "xdebug.remote_autostart=off" >> /etc/php/7.1/fpm/conf.d/xdebug.ini
+    && echo "zend_extension=$(find /usr/lib -name xdebug.so | tail -n2 | head -n1)" > /etc/php/7.1/fpm/conf.d/xdebug.ini \
+    && echo "xdebug.remote_enable=on" >> /etc/php/7.1/fpm/conf.d/xdebug.ini \
+    && echo "xdebug.remote_autostart=off" >> /etc/php/7.1/fpm/conf.d/xdebug.ini
 
 COPY ./conf/cron/mautic /etc/cron.d/mautic
 RUN chmod 0755 /etc/cron.d/mautic
@@ -63,6 +57,16 @@ CMD ["chmod -R 0777 /var/www/html/app/cache /var/www/html/app/logs"]
 RUN find / -name "php-fpm*"
 
 RUN rm /etc/php/7.1/fpm/pool.d/www.conf
+RUN rm /etc/php/7.1/fpm/php.ini
+RUN rm /etc/php/7.1/cli/php.ini
+COPY ./conf/php.ini /etc/php/7.1/fpm/php.ini
+COPY ./conf/php.ini /etc/php/7.1/cli/php.ini
+
+# Add sendmail to mailhog
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq postfix
+RUN rm /etc/postfix/main.cf
+COPY ./conf/mail/main.cf /etc/postfix/main.cf
+RUN /etc/init.d/postfix restart
 
 # Run the command on container startup
 # CMD cron && tail -f /var/log/cron.log
