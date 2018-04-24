@@ -37,6 +37,8 @@ In case you get access forbidden on mautic you might need to specify the IP of d
       XDEBUG_CONFIG: remote_host=HERE_DOCKER_MACHINE_IP
 ```
 
+**You need to adjust vhsot.conf too.** This will be unified and made to tell the machine ip it self. Anyone can do it.
+
 ## How to reset
 
 Use ```docker-compose down``` which should delete all containers, there are still compiled images present though.
