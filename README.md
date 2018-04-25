@@ -15,6 +15,8 @@ Docker composer environment, all mautic files are located in **mautic** director
 
 In case you get access forbidden on mautic you might need to specify the IP of docker machine in file ```docker-compose.yml```, also **xdebug** configuration is provided to enable xdebug in your ide.
 
+**Docker machine must be VirtualBox not HyperV**
+
 ```
   phpfpm:
     restart: always
