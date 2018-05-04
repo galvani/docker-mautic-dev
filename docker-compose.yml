@@ -7,7 +7,6 @@ services:
     expose:
       - 1025
   phpfpm:
-    restart: always
     build: .docker/php7.1
     volumes:
       - './.docker/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf'
@@ -23,8 +22,12 @@ services:
       - 'beanstalkd:beanstalkd'
       - 'redis:redis'
     environment:
-      MAUTIC_DEV_HOSTS: 172.23.0.1
-      XDEBUG_CONFIG: remote_host=172.23.0.1
+      MAUTIC_DEV_HOSTS: 172.18.0.1
+      XDEBUG_CONFIG: remote_host=172.18.0.1
+    volumes_from:
+      - beanstalkd
+      - mailhog
+      - redis
   nginx:
     image: 'nginx:latest'
     ports:
@@ -53,13 +56,6 @@ services:
     volumes:
       - './var/lib/mysql:/var/lib/mysql'
       - './var/log/mysql:/var/log/mysql'
-  # elasticsearch:
-  #   image: 'docker.elastic.co/elasticsearch/elasticsearch:6.2.1'
-  #   ports:
-  #     - '9200:9200'
-  #     - '9300:9300'
-  #   environment:
-  #     - discovery.type=single-node
   beanstalkd:
     image: schickling/beanstalkd
     ports:
@@ -78,6 +74,5 @@ services:
       - 6379:6379
     expose:
       - 6379
-
 volumes:
   userroot:
