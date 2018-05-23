@@ -66,8 +66,14 @@ COPY ./conf/php.ini /etc/php/7.1/cli/php.ini
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq postfix
 RUN rm /etc/postfix/main.cf
 COPY ./conf/mail/main.cf /etc/postfix/main.cf
-RUN /etc/init.d/postfix restart
+
+RUN rm -f /var/spool/postfix/etc/hosts /var/spool/postfix/etc/resolv.conf
+RUN ln -s /etc/hosts /var/spool/postfix/etc/hosts
+RUN ln -s /etc/resolv.conf /var/spool/postfix/etc/resolv.conf
+
+RUN systemctl enable postfix
+COPY ./launcher.sh /usr/bin/postfix-launcher
+RUN chmod 755 /usr/bin/postfix-launcher
 
 # Run the command on container startup
-# CMD cron && tail -f /var/log/cron.log
-CMD ["/usr/sbin/php-fpm7.1", "-F"]
+CMD ["postfix-launcher", "/usr/sbin/php-fpm7.1", "-F"]

@@ -44,3 +44,5 @@ inet_protocols = all
 lmtp_host_lookup = native
 smtp_host_lookup = native
 ignore_mx_lookup_error = yes
+
+compatibility_level=2
