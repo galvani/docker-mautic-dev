@@ -25,6 +25,12 @@ Root mysql password can be found in **composer.yml**
 
 ### Troubleshooting
 
+#### Windows & GIT
+You need to adjust you git config not to transform line endings. Please use
+
+```git clone https://github.com/galvani/mautic-docker.git --config core.autocrlf=input```
+
+
 Docker machine must be **VirtualBox not HyperV** otherwise local folder wont't get mounted into the container.
 
 In case you get access forbidden on mautic you might need to specify the IP of docker machine in file ```docker-compose.yml```, also **xdebug** configuration is provided to enable xdebug in your ide.
