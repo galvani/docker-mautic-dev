@@ -1,49 +1,8 @@
 version: "2.3"
 services:
-  mailhog:
-    build: .docker/mailhog
-    ports:
-      - '8025:8025'
-    expose:
-      - 1025
-  phpfpm:
-    build: .docker/php7.1
-    volumes:
-      - './.docker/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.conf'
-      - './.docker/php/conf/php.ini:/usr/local/etc/php/php.ini'
-      - './mautic:/var/www/html'
-      - './mautic-hosted:/var/www/html-hosted'
-      - './var/log/php-fpm:/var/log/php-fpm'
-      - './var/mail:/var/spool/mail'
-      - 'userroot:/root'
-    links:
-      - 'db:mysqldb'
-      - 'mailhog:mail'
-      - 'beanstalkd:beanstalkd'
-      - 'redis:redis'
-    environment:
-      MAUTIC_DEV_HOSTS: 172.18.0.1
-      XDEBUG_CONFIG: remote_host=172.18.0.1
-    volumes_from:
-      - beanstalkd
-      - mailhog
-      - redis
-  nginx:
-    image: 'nginx:latest'
-    ports:
-      - '8080:8080'
-      - '8081:8081'
-    links:
-      - 'phpfpm:phpfpm'
-    volumes:
-      - './.docker/nginx/conf/vhost.conf:/etc/nginx/conf.d/default.conf'
-      - './var/log/nginx:/var/log/nginx'
-    volumes_from:
-      - phpfpm
-    environment:
-      - BEANSTALKD_HOST=beanstalkd
   db:
-    image: 'mysql:5.7'
+    restart: always
+    image: 'mysql/mysql-server:5.7'
     ports:
       - '3307:3306'
     expose:
@@ -53,26 +12,46 @@ services:
       MYSQL_USER: mautic
       MYSQL_PASSWORD: sxdf675n
       MYSQL_DATABASE: mautic
-    volumes:
-      - './var/lib/mysql:/var/lib/mysql'
-      - './var/log/mysql:/var/log/mysql'
-  beanstalkd:
-    image: schickling/beanstalkd
-    ports:
-      - '11300:11300'
-    expose:
-      - 11300
-  beanstalkd-console:
-    image: schickling/beanstalkd-console
-    ports:
-      - '2080:2080'
-    links:
-      - 'beanstalkd:beanstalkd'
   redis:
+    restart: always
     image: 'redis:latest'
     ports:
-      - 6379:6379
+      - 6380:6379
     expose:
       - 6379
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+  nginx:
+    image: nginx
+    restart: "no"
+    ports:
+      - "8088:80"
+    links:
+      - redis
+      - crate-1
+      - db
+  crate-1:
+    restart: "no" 
+    image: crate:latest
+    expose:
+      - 4200
+      - 5432
+    ports:
+      - "4200:4200"
+      - "5432:5432"
+    volumes:
+      - cratedb:/data
+    environment:
+      CRATE_HEAP_SIZE: 512m
+    command: crate -Cnode.name=crate-1 -Ccluster.routing.allocation.disk.threshold_enabled=false
+  php-fpm:
+    restart: "no"
+    build: ./.docker/php7.2
+
+
 volumes:
   userroot:
+  cratedb:
