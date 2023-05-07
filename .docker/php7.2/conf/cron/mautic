@@ -1,4 +1,0 @@
-# m h  dom mon dow   command
-0,15,30,45 * * * * 	php /var/www/html/app/console mautic:segments:update > /proc/1/fd/1 2>/proc/1/fd/2
-5,20,35,50 * * * * 	php /var/www/html/app/console mautic:campaigns:update > /proc/1/fd/1 2>/proc/1/fd/2
-10,25,40,55 * * * * php /var/www/html/app/console mautic:campaigns:trigger > /proc/1/fd/1 2>/proc/1/fd/2
