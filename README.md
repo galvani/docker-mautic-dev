@@ -12,15 +12,20 @@ Docker composer environment, all mautic files are located in **mautic** director
 ## Check .env for more details
 
 ## Post-install actions (will be automated in the future)
-
+> @todo - npm even when installed just won't compile
 ```
 docker compose exec php apt update && 
 docker compose exec php apt install npm -y --no-install-recommends
 docker compose exec php composer install
 ```
 
-
 ## Installed containers
 
- * galvani/phpfony for php
- * 
+| Name         | Image               | Ports |
+|--------------|---------------------|-------|
+| **rabbitmq** | rabbitmq:latest     | .env  |
+| **redis**    | redis:latest        |       |
+| **mysql**    | mysql               |       |
+| **php**      | galvani/phpfony:8.0 |       |
+
+
