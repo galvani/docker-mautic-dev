@@ -4,7 +4,7 @@ server {
     server_name localhost;
     error_log  /var/log/nginx/${NGINX_HOST}_error.log;
     access_log /var/log/nginx/${NGINX_HOST}_access.log;
-    root /var/www/html/public;
+    root /var/www/html;
 
    location / {
            # try to serve file directly, fallback to app.php

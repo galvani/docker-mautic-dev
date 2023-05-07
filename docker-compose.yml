@@ -50,23 +50,23 @@ services:
       - php
     volumes:
       - ./.docker/nginx/templates:/etc/nginx/templates
-      - ./mautic:/var/www/html/public
+      - ./mautic:/var/www/html
       - ./var/log/nginx:/var/log/nginx
   php:
     restart: "no"
     image: galvani/phpfony:8.0
     volumes:
       - "userroot:/root"
-      - ./mautic:/var/www/html/public
-      - ./var/mautic:/var/www/html/public/var
+      - ./mautic:/var/www/html
+      - ./var/mautic:/var/www/html/var
     environment:
       - XDEBUG_CONFIG="remote_host=host.docker.internal"
       - XDEBUG_MODE=develop,debug
       - MAUTIC_CUSTOM_DEV_HOSTS=["172.27.0.1"]
       - DDEV_TLD=true
     command: >
-      sh -c "chmod -R 777 /var/www/html/public/var &&
-             chmod -R 777 /var/www/html/public/app/config &&
+      sh -c "chmod -R 777 /var/www/html/var &&
+             chmod -R 777 /var/www/html/app/config &&
              php-fpm -F -R
       "
     depends_on:
