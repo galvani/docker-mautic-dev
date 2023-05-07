@@ -72,8 +72,20 @@ services:
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     expose:
       - 9000
+  rabbitmq:
+      image: rabbitmq:latest
+      environment:
+        - RABBITMQ_DEFAULT_USER=admin
+        - RABBITMQ_DEFAULT_PASS=admin
+      ports:
+        - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+      expose:
+        - 5672
+      volumes:
+        - "./.docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins"
 
 volumes:
   userroot:
