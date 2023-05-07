@@ -11,6 +11,15 @@ Docker composer environment, all mautic files are located in **mautic** director
 
 ## Check .env for more details
 
+## Post-install actions (will be automated in the future)
+
+```
+docker compose exec php apt update && 
+docker compose exec php apt install npm -y --no-install-recommends
+docker compose exec php composer install
+```
+
+
 ## Installed containers
 
  * galvani/phpfony for php

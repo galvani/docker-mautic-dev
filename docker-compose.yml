@@ -66,9 +66,9 @@ services:
       - DDEV_TLD=true
     command: >
       sh -c "chmod -R 777 /var/www/html/var &&
-             chmod -R 777 /var/www/html/app/config &&
-             php-fpm -F -R
-      "
+        chmod -R 777 /var/www/html/media &&
+        chmod -R 777 /var/www/html/app/config &&
+        php-fpm -F -R"
     depends_on:
       - mysql
       - redis
