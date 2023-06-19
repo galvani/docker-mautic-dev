@@ -19,6 +19,11 @@ docker compose exec php apt install npm -y --no-install-recommends
 docker compose exec php composer install
 ```
 
+## Shell should not load xdebug
+```shell
+XDEBUG_MODE=off composer -v require symfony/amqp-messenger
+```
+
 ## Installed containers
 
 | Name         | Image               | Ports |

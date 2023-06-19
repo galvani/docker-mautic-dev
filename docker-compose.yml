@@ -53,17 +53,26 @@ services:
       - ./mautic:/var/www/html
       - ./var/log/nginx:/var/log/nginx
   php:
+    extra_hosts:
+      - host.docker.internal:host-gateway
     restart: "no"
-    image: galvani/phpfony:8.0
+    build: .docker/php8.1
     volumes:
       - "userroot:/root"
       - ./mautic:/var/www/html
       - ./var/mautic:/var/www/html/var
     environment:
-      - XDEBUG_CONFIG="remote_host=host.docker.internal"
-      - XDEBUG_MODE=develop,debug
-      - MAUTIC_CUSTOM_DEV_HOSTS=["172.27.0.1"]
-      - DDEV_TLD=true
+      XDEBUG_ENABLED: 1
+      XDEBUG_REMOTE_AUTOSTART: 1
+      XDEBUG_MAXNESTING_LEVEL: 1000
+      XDEBUG_REMOTE_CONNECT_BACK: 1
+      XDEBUG_REMOTE_HOST: host.docker.internal
+      XDEBUG_CLIENT_PORT: 9008
+      DDEV_TLD: 1
+      MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
+      MAUTIC_MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
+      APP_ENV: dev
+      # SENTRY_DSN: https://d297e3db6b124649bde9b8f0c24498ad@sentry.galvani.tech/4
     command: >
       sh -c "chmod -R 777 /var/www/html/var &&
         chmod -R 777 /var/www/html/media &&
@@ -76,7 +85,7 @@ services:
     expose:
       - 9000
   rabbitmq:
-      image: rabbitmq:latest
+      image: rabbitmq:3.11-management
       environment:
         - RABBITMQ_DEFAULT_USER=admin
         - RABBITMQ_DEFAULT_PASS=admin
