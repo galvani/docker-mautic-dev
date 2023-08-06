@@ -7,7 +7,7 @@ Docker composer environment, all mautic files are located in **mautic** director
  * clone this repository
  * cd into the directory and run: ```git submodule init && git submodule update``` to checkout the current mautic version
  * run ```docker-compose up``` the containers will get created and started
- * navigate to: http://localhost:8088/index_dev.php
+ * navigate to: http://localhost:8888/
 
 ## Check .env for more details
 
