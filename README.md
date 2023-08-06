@@ -12,11 +12,11 @@ Docker composer environment, all mautic files are located in **mautic** director
 ## Check .env for more details
 
 ## Post-install actions (will be automated in the future)
-> @todo - npm even when installed just won't compile
+
+### Install vendors and compile assets
+
 ```
-docker compose exec php apt update && 
-docker compose exec php apt install npm -y --no-install-recommends
-docker compose exec php composer install
+docker compose exec php composer install && chmod -R 777 var/*
 ```
 
 ## Shell should not load xdebug
