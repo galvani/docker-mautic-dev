@@ -104,6 +104,11 @@ RUN go get github.com/mailhog/mhsendmail
 RUN cp /root/go/bin/mhsendmail /usr/bin/mhsendmail
 RUN echo 'sendmail_path = /usr/bin/mhsendmail --smtp-addr mailhog:1025' >> /usr/local/etc/php/php.ini
 
+
+# Install NODE.js 16.x
+RUN curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+RUN bash /tmp/nodesource_setup.sh && apt install nodejs
+
 RUN rm -rf /var/lib/apt/lists/*
 
 STOPSIGNAL SIGQUIT
