@@ -1,0 +1,2 @@
+# m h  dom mon dow   command
+0,15,30,45 * * * * 	php /var/www/html/bin/console > /proc/1/fd/1 2>/proc/1/fd/2
