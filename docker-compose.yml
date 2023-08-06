@@ -60,7 +60,6 @@ services:
     volumes:
       - "userroot:/root"
       - ./mautic:/var/www/html
-      - ./var/mautic:/var/www/html/var
     environment:
       XDEBUG_ENABLED: 1
       XDEBUG_REMOTE_AUTOSTART: 1
@@ -72,7 +71,6 @@ services:
       MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
       MAUTIC_MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
       APP_ENV: dev
-      # SENTRY_DSN: https://d297e3db6b124649bde9b8f0c24498ad@sentry.galvani.tech/4
     command: >
       sh -c "chmod -R 777 /var/www/html/var &&
         chmod -R 777 /var/www/html/media &&
