@@ -10,13 +10,14 @@ RUN apt-get update \
     && update-locale LANG=en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
+ENV NODE_MAJOR=20
 
 RUN echo "export LANGUAGE=en_US.UTF-8 && export LANG=en_US.UTF-8 && export LC_ALL=en_US.UTF-8">>~/.bash_profile
 RUN apt-get install -y 
 RUN locale-gen en_US.UTF-8
 
 RUN yes | apt-get install systemd
-
+RUN chmod -R 777 /tmp
 RUN apt-get update && apt-get install --no-install-recommends -y \
 	unzip \
 	libicu-dev \
@@ -59,6 +60,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	librabbitmq-dev \
 	openssl
 
+RUN apt install -y ca-certificates curl gnupg && mkdir -p /etc/apt/keyrings
+
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN apt update
+
 RUN docker-php-ext-configure gd --prefix=/usr --with-freetype --with-webp=  --with-jpeg \
     && docker-php-ext-install gd exif 
 
@@ -71,7 +78,7 @@ RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl && docker-php-
 RUN docker-php-ext-install bcmath sockets mysqli gettext
 RUN docker-php-ext-install pdo bcmath intl mbstring soap xsl zip fileinfo
 RUN docker-php-ext-install mysqli pdo_mysql
-RUN docker-php-source delete && rm -r /tmp/* /var/cache/*
+RUN docker-php-source delete
 
 RUN mkdir -p /var/run/php
 
@@ -79,7 +86,7 @@ COPY conf/php.ini /usr/local/etc/php/php.ini
 
 RUN echo xdebug.mode=debug >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 # #RUN echo xdebug.start_with_request=yes >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo xdebug.idekey=\"PHPSTORM\" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.client_port=9003 >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.remote.mode=req >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo xdebug.remote.handler=dbgp >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
@@ -104,12 +111,11 @@ RUN go get github.com/mailhog/mhsendmail
 RUN cp /root/go/bin/mhsendmail /usr/bin/mhsendmail
 RUN echo 'sendmail_path = /usr/bin/mhsendmail --smtp-addr mailhog:1025' >> /usr/local/etc/php/php.ini
 
+RUN apt install nodejs -y
 
-# Install NODE.js 16.x
-RUN curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
-RUN bash /tmp/nodesource_setup.sh && apt install nodejs
+RUN apt install acl
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/cache/*
 
 STOPSIGNAL SIGQUIT
 

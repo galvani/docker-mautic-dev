@@ -50,6 +50,7 @@ server {
           # for more information).
           fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
           fastcgi_param DOCUMENT_ROOT $realpath_root;
+	  fastcgi_read_timeout 300; 
 
           fastcgi_buffering off;
           # if buffering on the following is relevant
