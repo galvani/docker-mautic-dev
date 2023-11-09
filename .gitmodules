@@ -1,3 +1,0 @@
-[submodule "mautic"]
-	path = mautic
-	url = git@github.com:mautic/mautic.git

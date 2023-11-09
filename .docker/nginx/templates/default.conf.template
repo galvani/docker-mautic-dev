@@ -19,6 +19,7 @@ server {
            fastcgi_buffers 16 32k;
            fastcgi_buffer_size 64k;
            fastcgi_busy_buffers_size 64k;
+           fastcgi_param HTTPS on;
 
 	   fastcgi_read_timeout 3600s;
 
@@ -50,6 +51,7 @@ server {
           # for more information).
           fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
           fastcgi_param DOCUMENT_ROOT $realpath_root;
+	  fastcgi_read_timeout 300;
 
           fastcgi_buffering off;
           # if buffering on the following is relevant

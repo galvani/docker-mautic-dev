@@ -4,6 +4,7 @@ mysql/databases/*
 !.gitkeep
 var/
 .idea
+.fleet
 
 ###> symfony/webpack-encore-pack ###
 /node_modules/

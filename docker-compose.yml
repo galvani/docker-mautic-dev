@@ -14,6 +14,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql:/var/lib/mysql
   redis:
     restart: always
     image: 'redis:latest'
@@ -42,7 +44,7 @@ services:
       - "${MAUTIC_PUBLIC_PORT}:80"
     environment:
       - PHP_FPM=php:9000
-      - NGINX_HOST=mautic.local
+      - NGINX_HOST=localhost
       - NGINX_PORT=80
     depends_on:
       - php
@@ -71,17 +73,25 @@ services:
       MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
       MAUTIC_MESSENGER_TRANSPORT_DSN: amqp://admin:admin@rabbitmq:5672/0
       APP_ENV: dev
+      PHP_IDE_CONFIG: "serverName=\"mautic.local\""
     command: >
-      sh -c "chmod -R 777 /var/www/html/var &&
+      sh -c "[ -d "/var/www/html/var" ] || mkdir "/var/www/html/var" && chmod -R 777 /var/www/html/var &&
         chmod -R 777 /var/www/html/media &&
         chmod -R 777 /var/www/html/app/config &&
+        setfacl -dR -m u:"www-data":rwX -m u:root:rwX /var/www/html/var &&
+        setfacl -R -m u:"www-data":rwX -m u:root:rwX var &&
         php-fpm -F -R"
-    depends_on:
+    links:
       - mysql
       - redis
       - rabbitmq
+      - cratedb01
     expose:
       - 9000
+    networks:
+      - dev-env-local_local_dev
+      - "plus-net"
+    
   rabbitmq:
       image: rabbitmq:3.11-management
       environment:
@@ -93,6 +103,73 @@ services:
         - 5672
       volumes:
         - "./.docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+      networks:
+        - "plus-net"
+
+  cratedb01:
+    image: crate:latest
+    ports:
+      - "4201:4200"
+      - "5432:5432"
+    volumes:
+      - cratedb01:/data
+    command: [ "crate",
+      "-Ccluster.name=crate-docker-cluster",
+      "-Cnode.name=cratedb01",
+      "-Cnode.data=true",
+      "-Cnetwork.host=_site_",
+      "-Cdiscovery.seed_hosts=cratedb02",
+      "-Ccluster.initial_master_nodes=cratedb01,cratedb02",
+      "-Cgateway.expected_data_nodes=2",
+      "-Cgateway.recover_after_data_nodes=2",
+      "-Ccluster.routing.allocation.disk.watermark.flood_stage=100%",
+      "-Ccluster.routing.allocation.disk.watermark.low=100%",
+      "-Ccluster.routing.allocation.disk.watermark.high=100%",
+    ]
+    deploy:
+      replicas: 1
+    environment:
+      - CRATE_HEAP_SIZE=2g
+    depends_on:
+      - cratedb02
+    networks:
+      - "plus-net"
+
+  cratedb02:
+    image: crate:latest
+    ports:
+      - "4202:4200"
+    volumes:
+      - cratedb02:/data
+    command: [ "crate",
+      "-Ccluster.name=crate-docker-cluster",
+      "-Cnode.name=cratedb02",
+      "-Cnode.data=true",
+      "-Cnetwork.host=_site_",
+      "-Cdiscovery.seed_hosts=cratedb01",
+      "-Ccluster.initial_master_nodes=cratedb01,cratedb02",
+      "-Cgateway.expected_data_nodes=2",
+      "-Cgateway.recover_after_data_nodes=2",
+      "-Ccluster.routing.allocation.disk.watermark.flood_stage=100%",
+      "-Ccluster.routing.allocation.disk.watermark.low=100%",
+      "-Ccluster.routing.allocation.disk.watermark.high=100%"
+    ]
+    deploy:
+      replicas: 1
+    environment:
+      - CRATE_HEAP_SIZE=2g
+    networks:
+      - "plus-net"
+  
 
 volumes:
   userroot:
+  mysql:
+  cratedb01:
+  cratedb02:
+
+networks:
+  plus-net:
+  dev-env-local_local_dev:
+    external: true
+
